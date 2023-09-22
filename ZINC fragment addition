@@ -1,0 +1,101 @@
+import os
+import re
+import random
+import gzip
+import rdkit
+from rdkit import Chem
+from rdkit.Chem import AllChem
+from rdkit.Chem import rdChemReactions
+import random
+import io
+from rdkit.Chem import ReplaceCore, GetMolFrags, ReplaceSubstructs, CombineMols
+from molvs import Standardizer
+from rdkit.Chem.MolStandardize import rdMolStandardize
+
+s = Standardizer()
+n = rdMolStandardize.Normalizer()
+
+
+core1 = Chem.MolFromSmiles("C[C@H]([C@H]([C@@H](/C=C([*])\CC[C@H]([C@@H]([C@H]([C@H](/C=C\C=C)C)OC(N)=O)C)O)C)O)CCCC[C@@H]1OC([C@H](C)[C@H]([C@H]1C)O)=O")
+core2 = Chem.MolFromSmiles('C[C@H]([C@H]([C@@H](/C=C\CC([*])[C@H]([C@@H]([C@H]([C@H](/C=C\C=C)C)OC(N)=O)C)O)C)O)CCCC[C@@H]1OC([C@H](C)[C@H]([C@H]1C)O)=O')
+core3 = Chem.MolFromSmiles('C[C@H]([C@H]([C@@H](/C=C\CC[C@H]([C@@H]([C@H]([C@H](/C=C\C=C\[*])C)OC(N)=O)C)O)C)O)CCCC[C@@H]1OC([C@H](C)[C@H]([C@H]1C)O)=O')
+core4 = Chem.MolFromSmiles('C[C@H]([C@H]([C@@H](/C=C\CC[C@H]([C@@H]([C@H]([C@H](/C=C\C=C)C)OC(N[*])=O)C)O)C)O)CCCC[C@@H]1OC([C@H](C)[C@H]([C@H]1C)O)=O')
+core5 = Chem.MolFromSmiles('C[C@H]([C@H]([C@@H](/C=C\CC[C@H]([C@@H]([C@H]([C@H](/C=C\C=C)C)OC(N)=O)C)O)C)O)CCC(*)C[C@@H]1OC([C@H](C)[C@H]([C@H]1C)O)=O')
+
+                            
+reppos = 0
+
+def unzip():
+    fraglist = []  
+        # Get a list of all the files in the directory
+    files = os.listdir('D:\\')
+
+        # Pick a random file from the list of files
+    random_file = random.choice(files)
+
+        # Set the full path to the random file
+    random_file_path = os.path.join('D:\\', random_file)
+
+        # Check if the random file is a directory
+    if os.path.isdir(random_file_path):
+          # Get a list of all the files in the directory
+        inner_files = os.listdir(random_file_path)
+    
+          # Pick a random file from the list of files
+        inner_random_file = random.choice(inner_files)
+
+        # Set the full path to the inner random file
+        inner_random_file_path = os.path.join(random_file_path, inner_random_file)
+    
+        if os.path.isdir(inner_random_file_path) and len(os.listdir(inner_random_file_path))>0:
+            gzfile = os.listdir(inner_random_file_path)[0]
+
+            with gzip.open(f'{inner_random_file_path}\{gzfile}','rb') as inf:
+
+                supplier = Chem.ForwardSDMolSupplier(inf)
+
+                
+                for mol in supplier:
+                    if mol is not None:
+                        for atom in mol.GetAtoms():
+                            atom.SetAtomMapNum(0)
+                        flag = False
+                        for atom in mol.GetAtoms():
+                            if not flag and atom.GetSymbol() in ['C', 'N', 'O', 'S'] and atom.GetTotalNumHs() > 0:
+                                #Chem.RemoveHs(mol, implicitOnly=False)
+                                #atom.SetNumImplicitHs(atom.GetTotalNumHs()-1)
+
+                                reppos = atom.GetIdx()
+                                strmol = Chem.MolToSmiles(mol)
+                                newstr = re.sub(r"H\d*", "", strmol)
+                                mol = Chem.MolFromSmiles(newstr)
+                                flag = True
+                        #rz =  Chem.MolFromSmiles(r'CCC')  #FOR TESTING
+                        
+
+                        return(mol)
+                        
+                    else:
+                        continue
+     
+                
+                
+
+        else:
+            return unzip()
+        
+def make_analogues():
+    writer = Chem.SDWriter(r'C:\Users\joshi\OneDrive - University of Cambridge\Cambridge 20-24\core5x1000.sdf')
+    for i in range(1000):
+        try:
+            product_mol = Chem.ReplaceSubstructs(core5, Chem.MolFromSmarts('[#0]'), unzip(), replacementConnectionPoint=reppos)
+            pt = product_mol[0]
+            n.normalize(pt)
+            spt = rdMolStandardize.Cleanup(pt)
+            writer.write(spt)
+
+        except:
+            continue
+    return(spt)   
+
+make_analogues()
