@@ -11,4 +11,6 @@ groups in medicinal chemistry (Takeuchi K, Kunimoto R, Bajorath J. Systematic ma
 - conf.txt which contains the docking details (binding site and number of modes) provided here for discodermolide in tubulin (5LXT)
 - A pdb file of your protein with the ligand removed (provided here for discodermolide in tubulin (5LXT)) This can be done in PyMol.
 
+  Run Main_.py to run start the program.
+
 
