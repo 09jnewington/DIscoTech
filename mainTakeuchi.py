@@ -4,7 +4,7 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 
 #List of common MedChem R groups from the Takeuchi Paper
-Takeuchi_list = r'C:\\Users\\joshi\\OneDrive\\Desktop\\DiscoTech\\smiles.txt.txt'
+Takeuchi_list = r'smiles.txt.txt'
 
 def get_random_smiles(filename):
     #picks a random sidechain from a file
@@ -34,6 +34,7 @@ def mark_and_replace_atoms(smiles, important_atom_indices, num_variants=5):
 
     highlighted_atoms = get_highlighted_atoms(mol, important_atom_indices)
     mol = reduce_structure(mol, important_atom_indices)
+    modified_mols.append(mol)
 
     for i in range(num_variants):
         fragment = Chem.MolFromSmiles(get_random_smiles(Takeuchi_list))  # Getting a new random fragment for each replacement
