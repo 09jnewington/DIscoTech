@@ -6,8 +6,8 @@ def run():
     input2 = input("ready to proceed with docking?")
 
     # Define paths and directories
-    sdf_file = r"C:\Users\joshi\OneDrive\Desktop\DiscoTech\sdf_output.sdf"
-    output_dir = r"C:\Users\joshi\OneDrive\Desktop\DiscoTech\pdb_files"
+    sdf_file = r"sdf_output.sdf"
+    output_dir = r"pdb_files"
 
     # Convert the SDF file to individual PDB files
     subprocess.run(["obabel", sdf_file, "-O", os.path.join(output_dir, "molecule_.pdb"), "-m"])
@@ -21,8 +21,8 @@ def run():
             subprocess.run(["obabel", pdb_path, "-O", pdbqt_path, "--gen3d", "best", "-p"])
 
             # Define receptor path and config file path
-            receptor_path = r"C:\Users\joshi\OneDrive\Desktop\DiscoTech\5LXT_removesolvent_removehet_hadd.pdbqt"
-            config_path = r"C:\Users\joshi\OneDrive\Desktop\DiscoTech\conf.txt"
+            receptor_path = r"5LXT_removesolvent_removehet_hadd.pdbqt"
+            config_path = r"conf.txt"
 
             # Define the output path for the docked complex
             docked_output_path = os.path.join(output_dir, pdb.replace('.pdb', '_docked.pdbqt'))
