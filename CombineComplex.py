@@ -9,8 +9,8 @@ from rdkit import Chem
 import re
 
 # Define the path to your PDBQT file
-pdbqt_file_path = r"C:\Users\joshi\OneDrive\Desktop\DiscoTech\pdb_files\molecule_2_docked.pdbqt"
-directory_path = r"C:\Users\joshi\OneDrive\Desktop\DiscoTech\pdb_files"
+#pdbqt_file_pathway = r"C:\Users\joshi\OneDrive\Desktop\DiscoTech\pdb_files\molecule_10_docked.pdbqt"
+directory_path = r"pdb_files"
 
 #Interaction types
 interaction_patterns = {
@@ -44,6 +44,7 @@ def run(directory_path):
         pdbqt_file_path = os.path.join(directory_path, filename)
         # Process each file (skipping the first file)
         if pdbqt_file_path != first_file_path:
+            print("test1")
             compare_and_process_file(pdbqt_file_path, first_file_interactions)
 
 def parse_and_print_interactions(output):
@@ -53,8 +54,8 @@ def parse_and_print_interactions(output):
         matches = re.findall(pattern, output)
         if matches:
             #print(f"{interaction_type}s:")
-            interaction_data.append(f"{interaction_type}s:")
-            for i, match in enumerate(matches, start=1):
+            #interaction_data.append(f"{interaction_type}s:")
+            for match in matches:
                 # Parse the necessary components from the match string
                 bsatom_orig_idx_match = re.search(r'bsatom_orig_idx=(\d+)', match)
                 ligatom_orig_idx_match = re.search(r'ligatom_orig_idx=(\d+)', match)
@@ -73,7 +74,8 @@ def parse_and_print_interactions(output):
                 resnr = resnr_match.group(1)
 
                 # append the parsed information
-                interaction_data.append(f"  bsatom_orig_idx={bsatom_orig_idx}, ligatom_orig_idx={ligatom_orig_idx}, reschain={reschain}, restype={restype}, resnr={resnr}")
+                interaction_data.append(f"reschain={reschain}, restype={restype}, resnr={resnr}")
+                print("test3")
     return interaction_data
 
 def extract_binding_site(file_path):
@@ -119,36 +121,45 @@ def extract_binding_site(file_path):
 
     # Find indices of ligands with the name '7AK'
     indices = [j for j, x in enumerate(longnames) if x == '7AK']
-    interaction_set = []
     # Print interactions for each '7AK' ligand found
     for idx in indices:
         bsid = bsids[idx]
         interactions = mol.interaction_sets[bsid]
+        print("test2")
         interactions_output = parse_and_print_interactions(str(interactions.all_itypes))
-        lines = str(interactions_output).strip().split('\n')
-        for line in lines:
-            interaction_set.append(line)
-    file_interaction_set = set(interaction_set)
-    #print(interaction_set)
-    return(file_interaction_set)
+    interaction_output_set = set(interactions_output)
+    print("test4")
+    return(interaction_output_set)
 
 def compare_and_process_file(file_path, reference_interactions):
     # Process each file and compare its binding site
     current_file_interactions = extract_binding_site(file_path)
   
-    is_subset = reference_interactions.issubset(current_file_interactions)
     print("Current file interactions: ")
     print(current_file_interactions)
     print("Reference interactions: ")
     print(reference_interactions)
 
-    if not is_subset:
-        temp_del_input = input("Not a subset, press any button to delete file")
+    # Calculating the number of common interactions
+    common_interactions = reference_interactions.intersection(current_file_interactions)
+    num_common_interactions = len(common_interactions)
+
+    # Calculating the total number of interactions for Ligand 1
+    total_ligand1_interactions = len(reference_interactions)
+
+    # Calculating the conservation score
+    conservation_score = (num_common_interactions / total_ligand1_interactions) * 100
+
+    print(conservation_score)
+
+
+    if conservation_score < 90:
+        print("Less than 90 percent conservation, deleting file")
         os.remove(file_path)
 
     else:
         print("Interactions is a subset, file saved")
     
+if __name__ == '__main__':
 
-run(directory_path)
-
+    run(directory_path)
