@@ -2,8 +2,8 @@ import subprocess
 import os
 import glob
 
-input_dir = r"C:\Users\joshi\OneDrive\Desktop\DiscoTech\pdb_files"  # Replace with your PDBQT files directory
-output_file = r"C:\Users\joshi\OneDrive\Desktop\DiscoTech\final_sdf_output.sdf"  # Name of the output SDF file
+input_dir = r"pdb_files"  # Replace with your PDBQT files directory
+output_file = r"final_sdf_output.sdf"  # Name of the output SDF file
 
 
 def run():
