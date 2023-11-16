@@ -122,10 +122,8 @@ def extract_binding_site(file_path):
     for idx in indices:
         bsid = bsids[idx]
         interactions = mol.interaction_sets[bsid]
-        print("test2")
         interactions_output = parse_and_print_interactions(str(interactions.all_itypes))
     interaction_output_set = set(interactions_output)
-    print("test4")
     return(interaction_output_set)
 
 def compare_and_process_file(file_path, reference_interactions):
