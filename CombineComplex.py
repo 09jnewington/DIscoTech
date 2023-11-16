@@ -40,12 +40,9 @@ def run(directory_path):
     first_file_interactions = extract_binding_site(first_file_path)
     
     # Loop over all .pdbqt files in the directory
-    for filename in pdbqt_files:
+    for filename in pdbqt_files[1:]:
         pdbqt_file_path = os.path.join(directory_path, filename)
-        # Process each file (skipping the first file)
-        if pdbqt_file_path != first_file_path:
-            print("test1")
-            compare_and_process_file(pdbqt_file_path, first_file_interactions)
+        compare_and_process_file(pdbqt_file_path, first_file_interactions)
 
 def parse_and_print_interactions(output):
 
