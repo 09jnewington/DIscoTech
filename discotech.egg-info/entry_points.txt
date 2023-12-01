@@ -1,0 +1,2 @@
+[console_scripts]
+discotech = discotech.__main__:main

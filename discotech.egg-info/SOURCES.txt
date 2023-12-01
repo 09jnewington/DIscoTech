@@ -1,0 +1,15 @@
+README.md
+setup.py
+discotech/CombineComplex.py
+discotech/DockSDFfile.py
+discotech/FinalSDF.py
+discotech/__init__.py
+discotech/__main__.py
+discotech/mainTakeuchi.py
+discotech/utils.py
+discotech.egg-info/PKG-INFO
+discotech.egg-info/SOURCES.txt
+discotech.egg-info/dependency_links.txt
+discotech.egg-info/entry_points.txt
+discotech.egg-info/top_level.txt
+discotech/data/takeuchi_R_groups.txt
