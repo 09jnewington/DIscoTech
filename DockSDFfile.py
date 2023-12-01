@@ -3,11 +3,13 @@ import subprocess
 
 def run():
 
-    input2 = input("ready to proceed with docking?")
+    #input2 = input("ready to proceed with docking?")
 
     # Define paths and directories
     sdf_file = r"sdf_output.sdf"
     output_dir = r"pdb_files"
+
+
 
     # Convert the SDF file to individual PDB files
     subprocess.run(["obabel", sdf_file, "-O", os.path.join(output_dir, "molecule_.pdb"), "-m"])
@@ -18,7 +20,7 @@ def run():
             pdbqt_path = os.path.join(output_dir, pdb.replace('.pdb', '.pdbqt'))
 
             # Run the obabel command
-            subprocess.run(["obabel", pdb_path, "-O", pdbqt_path, "--gen3d", "best", "-p"])
+            subprocess.run(["obabel", pdb_path, "-O", pdbqt_path, "--gen3d", "--partialcharge gasteiger"])
 
             # Define receptor path and config file path
             receptor_path = r"5LXT_removesolvent_removehet_hadd.pdbqt"
