@@ -100,8 +100,8 @@ def run():
         print(f"Error: {error}")
         sys.exit(1)
 
+    # Generate the image with original and modified molecules
     mols_to_draw = [Chem.MolFromSmiles(smiles)] + modified_molecules
-    #img = Draw.MolsToGridImage(mols_to_draw, molsPerRow=4, subImgSize=(200,200), legends=["Original"] + ["Modified"] * num_variants)
     with Chem.SDWriter('sdf_output.sdf') as writer:
         for mol in mols_to_draw:
             writer.write(mol)
