@@ -32,17 +32,20 @@ def run(directory_path):
     if not pdbqt_files:
         print("No .pdbqt files found in the directory.")
         return
+    first_file = next((f for f in pdbqt_files if f.endswith("1_docked.pdbqt")), None)
 
     # Path of the first .pdbqt file
-    first_file_path = os.path.join(directory_path, pdbqt_files[0])
+    first_file_path = os.path.join(directory_path, first_file)
 
     # Extract and store the binding site information of the first file
     first_file_interactions = extract_binding_site(first_file_path)
     
     # Loop over all .pdbqt files in the directory
-    for filename in pdbqt_files[1:]:
-        pdbqt_file_path = os.path.join(directory_path, filename)
-        compare_and_process_file(pdbqt_file_path, first_file_interactions)
+    for filename in pdbqt_files:
+        if not filename.endswith("1_docked.pdbqt"):
+            pdbqt_file_path = os.path.join(directory_path, filename)
+            # Process each file (skipping the first file)
+            compare_and_process_file(pdbqt_file_path, first_file_interactions)
 
 def parse_and_print_interactions(output):
 
@@ -72,7 +75,6 @@ def parse_and_print_interactions(output):
 
                 # append the parsed information
                 interaction_data.append(f"reschain={reschain}, restype={restype}, resnr={resnr}")
-                print("test3")
     return interaction_data
 
 def extract_binding_site(file_path):
@@ -158,3 +160,5 @@ def compare_and_process_file(file_path, reference_interactions):
 if __name__ == '__main__':
 
     run(directory_path)
+
+
