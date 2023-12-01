@@ -1,8 +1,10 @@
 import mainTakeuchi
 import DockSDFfile
 import CombineComplex
+import FinalSDF
+import SAScore
 
-directory_path = r"C:\Users\joshi\OneDrive\Desktop\DiscoTech\pdb_files"
+directory_path = r"pdb_files"
 
 
 ## call main Takeuchi
@@ -11,4 +13,8 @@ mainTakeuchi.run()
 DockSDFfile.run()
 ## Run combinecomplex
 CombineComplex.run(directory_path)
+##Collect mols and add to final SDF file
+FinalSDF.run()
+##SAScore
+SAScore.run()
 
