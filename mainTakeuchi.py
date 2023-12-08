@@ -1,12 +1,16 @@
 import sys
 import random
 from rdkit import Chem
+import os
+from rdkit.Chem import RDConfig
+from rdkit.Chem import Descriptors
 from rdkit.Chem import Draw
+from rdkit.Chem import AllChem
+sys.path.append(os.path.join(RDConfig.RDContribDir, 'SA_Score'))
+import sascorer
+
 
 #DTX dummy atoms are [6, 9, 18, 23, 32]
-
-print('hello')
-
 
 #List of common MedChem R groups from the Takeuchi Paper
 Takeuchi_list = r'smiles.txt.txt'
@@ -85,6 +89,25 @@ def reduce_structure(mol, important_indices=None):
 
     return mol
 
+def SAScorer(mol_to_draw):
+        l1 = len(mol_to_draw)
+        s_0 = 0
+        molstoremoveidx = []
+        for idx, mol in enumerate(mol_to_draw):
+            if mol is not None:
+                Chem.GetSSSR(mol)
+                if idx == 0:
+                    s_0 = sascorer.calculateScore(mol)
+                else:
+                    s = sascorer.calculateScore(mol)
+                    if s > s_0:
+                        molstoremoveidx.append(idx)
+        for idx, mol in enumerate(mol_to_draw):
+            if idx in molstoremoveidx:
+                mol_to_draw.remove(mol)
+        print("number of molecules removed: ", l1 - len(mol_to_draw))
+        return(mol_to_draw)
+
 def run():
     # Prompt the user for inputs
     smiles = input("Enter SMILES: ")
@@ -105,13 +128,24 @@ def run():
 
     # Generate the image with original and modified molecules
     mols_to_draw = [Chem.MolFromSmiles(smiles)] + modified_molecules
+
+                
+    #mol_to_draw = SAScorer(mols_to_draw)
+
     with Chem.SDWriter('sdf_output.sdf') as writer:
         for mol in mols_to_draw:
             writer.write(mol)
+
+    # Make pdb files
+    for idx, mol in enumerate(mols_to_draw):
+        mol = Chem.AddHs(mol)
+        AllChem.EmbedMolecule(mol)
+        pdb_filename = f"pdb_files/molecule_{idx}.pdb"
+        with open(pdb_filename, 'w') as file:
+            file.write(Chem.MolToPDBBlock(mol))
+
     
-    # Save the generated image
-    #img.save("molecules_grid.png")
-    #print("Image saved as 'molecules_grid.png'")
+ 
     print("sdf file saved as sdf_output.sdf")
 
 if __name__ == '__main__':
