@@ -2,7 +2,6 @@ import mainTakeuchi
 import DockSDFfile
 import CombineComplex
 import FinalSDF
-import SAScore
 
 directory_path = r"pdb_files"
 
@@ -15,6 +14,5 @@ DockSDFfile.run()
 CombineComplex.run(directory_path)
 ##Collect mols and add to final SDF file
 FinalSDF.run()
-##SAScore
-SAScore.run()
+
 

@@ -89,6 +89,8 @@ def reduce_structure(mol, important_indices=None):
 
     return mol
 
+##Test
+
 def SAScorer(mol_to_draw):
         l1 = len(mol_to_draw)
         s_0 = 0
