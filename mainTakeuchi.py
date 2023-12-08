@@ -5,6 +5,9 @@ from rdkit.Chem import Draw
 
 #DTX dummy atoms are [6, 9, 18, 23, 32]
 
+print('hello')
+
+
 #List of common MedChem R groups from the Takeuchi Paper
 Takeuchi_list = r'smiles.txt.txt'
 
