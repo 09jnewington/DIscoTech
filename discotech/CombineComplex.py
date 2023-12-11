@@ -1,3 +1,5 @@
+from typing import List
+
 import os
 from openbabel import openbabel
 from plip.structure.preparation import PDBComplex
@@ -77,7 +79,6 @@ def parse_and_print_interactions(output):
 
 def extract_binding_site(file_path):
     # This should return the binding site information as a set
-
     with open(file_path, "r", encoding="utf-8") as file:
         content = file.readlines()
 
@@ -95,7 +96,6 @@ def extract_binding_site(file_path):
         file.writelines(new_content)
 
     print("File updated successfully.")
-
     cmd.reinitialize()
     cmd.load(file_path, "ligand")
     protein_file = r"C:\Users\joshi\OneDrive\Desktop\DiscoTech\5LXT_no_7AK.pdb"
@@ -130,12 +130,6 @@ def extract_binding_site(file_path):
 def compare_and_process_file(file_path, reference_interactions):
     # Process each file and compare its binding site
     current_file_interactions = extract_binding_site(file_path)
-
-    print("Current file interactions: ")
-    print(current_file_interactions)
-    print("Reference interactions: ")
-    print(reference_interactions)
-
     # Calculating the number of common interactions
     common_interactions = reference_interactions.intersection(current_file_interactions)
     num_common_interactions = len(common_interactions)

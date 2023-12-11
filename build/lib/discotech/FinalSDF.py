@@ -4,6 +4,7 @@ import glob
 
 from .utils import setup_logger
 
+
 def run(input_dir: str, output_file: str):
     logger = setup_logger("CombineComplex.log")
     # Find all PDBQT files in the input directory

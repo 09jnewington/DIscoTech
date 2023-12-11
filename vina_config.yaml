@@ -1,0 +1,4 @@
+center: [25.0,  47.492,  20.431]
+box_size: [25, 25, 25]
+exhaustiveness: 8
+n_poses: 10

@@ -4,9 +4,16 @@ channels:
   - anaconda
   - defaults
   - bioconda
+  - hcc
 dependencies:
   - python=3.11
   - openbabel=3.1.1
   - plip=2.3.0
-  - rdkit=2023.09.2
+  - rdkit
+  - vina=1.2.5
+  - pyyaml=6.0.1
+  - scipy=1.11.3
+  - adfr-suite
   - pip
+  - pip:
+      - meeko
