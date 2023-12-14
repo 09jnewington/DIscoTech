@@ -36,15 +36,16 @@ def get_highlighted_atoms(mol: Mol, important_indices: Optional[List[int]] = Non
     return list(highlighted_atoms)
 
 
-def prepare_mol(mol: Mol) -> Mol:
+def prepare_mol(mol: Mol, compute_3d: bool = True) -> Mol:
     """Prepares a molecule for docking, adding hydrogens, partial charges, and 3D coordinates."""
     Chem.SanitizeMol(mol)
     mol = AllChem.AddHs(mol)
     AllChem.ComputeGasteigerCharges(mol, throwOnParamFailure=True)
 
     # Generate 3D conformation
-    AllChem.EmbedMolecule(mol, randomSeed=0)
-    AllChem.MMFFOptimizeMolecule(mol)
+    if compute_3d:
+        AllChem.EmbedMolecule(mol, randomSeed=0)
+        AllChem.MMFFOptimizeMolecule(mol)
 
     return mol
 
@@ -62,7 +63,7 @@ def mark_and_replace_atoms(
 
     mol = reduce_structure(mol, important_atom_indices)
     n_atoms = mol.GetNumAtoms()
-    modified_mols.append(prepare_mol(mol))
+    modified_mols.append(prepare_mol(mol, compute_3d=False))
 
     n_molecules_made = 0
     while n_molecules_made < num_variants:
@@ -77,35 +78,28 @@ def mark_and_replace_atoms(
         replacement_atom_index = random.choice(available_atoms)
 
         combined_mol = Chem.CombineMols(mol, fragment)
-        mod_mol = Chem.EditableMol(combined_mol)
         replacement_atom = combined_mol.GetAtomWithIdx(replacement_atom_index)
 
+        mod_mol = Chem.EditableMol(combined_mol)
         first_fragment_atom = n_atoms
 
-        # if the replacement atom valence is full, break a random bond
-        replacement_valence = replacement_atom.GetExplicitValence()
-
+        # add a bond to the first fragment atom
         mod_mol.AddBond(
             replacement_atom_index,
             first_fragment_atom,
             order=Chem.BondType.SINGLE,
         )
 
-        if (
-            replacement_valence
-            >= Valences.__members__[replacement_atom.GetSymbol()].value
-        ):
-            bond_indices = [
-                bond.GetIdx()
-                for bond in replacement_atom.GetBonds()
-                if bond.GetEndAtomIdx() != first_fragment_atom
-            ]
-            if not bond_indices:
-                raise ValueError(
-                    f"Atom {replacement_atom_index} ({replacement_atom.GetSymbol()}) has full valence but "
-                    f"no bonds could be found."
-                )
-            bond_index = random.choice(bond_indices)
+        # check the valence of the replacement atom
+        replacement_atom_bond_orders = [
+            float(bond.GetBondType()) for bond in replacement_atom.GetBonds()
+        ]
+        valence = sum(replacement_atom_bond_orders)
+
+        # if the new valence is greater than the valence of the replacement atom, break bonds until it isn't
+        while valence >= Valences.__members__[replacement_atom.GetSymbol()].value:
+            bonds_to_replace = [bond.GetIdx() for bond in replacement_atom.GetBonds()]
+            bond_index = random.choice(bonds_to_replace)
             bond_to_break = combined_mol.GetBondWithIdx(bond_index)
             bond_type = bond_to_break.GetBondType()
 
@@ -126,6 +120,12 @@ def mark_and_replace_atoms(
                     bond_to_break.GetOtherAtomIdx(replacement_atom_index),
                     order=Chem.BondType.DOUBLE,
                 )
+
+            replacement_atom = mod_mol.GetMol().GetAtomWithIdx(replacement_atom_index)
+            replacement_atom_bond_orders = [
+                float(bond.GetBondType()) for bond in replacement_atom.GetBonds()
+            ]
+            valence = sum(replacement_atom_bond_orders)
 
         mod_mol = mod_mol.GetMol()
 
@@ -210,4 +210,6 @@ def run(
 
 
 if __name__ == "__main__":
-    run("CC(=O)OC1=CC=CC=C1C(=O)O")
+    run(
+        "C[C@H]1[C@@H](OC(=O)[C@@H]([C@H]1O)C)C[C@@H](/C=C\[C@H](C)[C@@H]([C@@H](C)/C=C(/C)\C[C@H](C)[C@H]([C@H](C)[C@H]([C@@H](C)/C=C\C=C)OC(=O)N)O)O)O",
+    )
