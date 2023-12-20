@@ -8,6 +8,7 @@ from rdkit.Chem import Draw
 from rdkit.Chem import AllChem
 sys.path.append(os.path.join(RDConfig.RDContribDir, 'SA_Score'))
 import sascorer
+  
 
 
 #DTX dummy atoms are [6, 9, 18, 23, 32]
@@ -188,4 +189,3 @@ def run():
 
 if __name__ == '__main__':
     run()
-
