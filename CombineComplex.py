@@ -1,12 +1,12 @@
 import os
-from pymol import cmd
 from openbabel import openbabel
 from plip.structure.preparation import PDBComplex
 import os
-import pandas as pd
+import pandas as pyd
 from io import StringIO
 from rdkit import Chem
 import re
+from pymol import cmd
 
 # Define the path to your PDBQT file
 #pdbqt_file_pathway = r"C:\Users\joshi\OneDrive\Desktop\DiscoTech\pdb_files\molecule_10_docked.pdbqt"
@@ -25,6 +25,8 @@ interaction_patterns = {
 
 
 def run(directory_path):
+    sdf_file = r"sdf_output.sdf"
+    scores = []
     # Get a list of .pdbqt files in the directory
     pdbqt_files = [f for f in os.listdir(directory_path) if f.endswith("_docked.pdbqt")]
 
@@ -32,20 +34,45 @@ def run(directory_path):
     if not pdbqt_files:
         print("No .pdbqt files found in the directory.")
         return
-    first_file = next((f for f in pdbqt_files if f.endswith("1_docked.pdbqt")), None)
+    first_file = next((f for f in pdbqt_files if f.endswith("0_docked.pdbqt")), None)
 
     # Path of the first .pdbqt file
     first_file_path = os.path.join(directory_path, first_file)
 
     # Extract and store the binding site information of the first file
     first_file_interactions = extract_binding_site(first_file_path)
+    scores.append(100)
     
     # Loop over all .pdbqt files in the directory
     for filename in pdbqt_files:
-        if not filename.endswith("1_docked.pdbqt"):
+        if not filename.endswith("0_docked.pdbqt"):
             pdbqt_file_path = os.path.join(directory_path, filename)
             # Process each file (skipping the first file)
-            compare_and_process_file(pdbqt_file_path, first_file_interactions)
+            score = compare_and_process_file(pdbqt_file_path, first_file_interactions)
+            scores.append(score)
+    add_scores_to_existing_sdf(scores,sdf_file)
+    print("Scores added to SDF file")
+
+def add_scores_to_existing_sdf(scores, sdf_file):
+    """Assign docking scores from a list to molecules in an SDF file and overwrite the file."""
+    # Load the SDF file
+    suppl = Chem.SDMolSupplier(sdf_file)
+    mols = [mol for mol in suppl if mol is not None]
+
+    # Check if the number of scores matches the number of molecules
+    if len(scores) != len(mols):
+        raise ValueError("The number of scores does not match the number of molecules in the SDF file.")
+
+    # Assign scores to molecules
+    for score, mol in zip(scores, mols):
+        mol.SetProp("SimilarityScore", str(score))
+
+    # Overwrite the SDF file with the modified molecules
+    writer = Chem.SDWriter(sdf_file)
+    for mol in mols:
+        writer.write(mol)
+    writer.close()
+    print("scores added to SDF file")
 
 def parse_and_print_interactions(output):
 
@@ -100,8 +127,8 @@ def extract_binding_site(file_path):
 
     cmd.reinitialize()        
     cmd.load(file_path, "ligand")
-    protein_file = r'C:\Users\joshi\OneDrive\Desktop\DiscoTech\5LXT_no_7AK.pdb'
-    complex_file =   r'C:\Users\joshi\OneDrive\Desktop\DiscoTech\complex4.pdb'
+    protein_file = r'C:\Users\joshi\Documents\DiscoTech\5LXT_no_7AK.pdb'
+    complex_file =   r'C:\Users\joshi\Documents\DiscoTech\complex4.pdb'
     cmd.load(protein_file, "prot")
     cmd.create("complex", "ligand, prot")
     cmd.save(complex_file, "complex")
@@ -148,17 +175,11 @@ def compare_and_process_file(file_path, reference_interactions):
     conservation_score = (num_common_interactions / total_ligand1_interactions) * 100
 
     print(conservation_score)
+    return conservation_score
 
 
-    if conservation_score < 90:
-        print("Less than 90 percent conservation, deleting file")
-        os.remove(file_path)
-
-    else:
-        print("Interactions is a subset, file saved")
+  
     
 if __name__ == '__main__':
 
     run(directory_path)
-
-
